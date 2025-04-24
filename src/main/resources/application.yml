@@ -1,1 +1,40 @@
-spring.application.name=example
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8888/" #Externalize configuration 
+  profiles:
+    active: ${ACTIVE_PROFILE:local}
+  application:
+    name: example
+  datasource: #Database connections
+    url: ${env.ds-config.url}
+    username: ${env.ds-config.username}
+    password: ${env.ds-config.password}
+    driverClassName: ${env.ds-config.driver}
+  jpa: # JPA settings
+    database-platform: ${env.jpa-config.database-platform}
+    defer-datasource-initialization: ${env.jpa-config.defer-datasource-initialization}
+  #If we add this sql.init properties we MUST have a data.sql file 
+  #containing SQL sentences to populate the database
+  sql:
+    init:
+      data-locations: ${env.sql-config.init.data-location}
+      mode: ${env.sql-config.init.mode}
+      platform: ${env.sql-config.init.platform}
+  h2:
+    console:
+      enabled: ${env.h2-config.console.enabled}
+      path: ${env.h2-config.console.path}
+      settings.trace: ${env.h2-config.console.settings.trace}
+      settings.web-allow-others: ${env.h2-config.console.settings.web-allow-others}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh #dynamically reload configuration properties at runtime. Using actuator endpoint /actuator/refresh
+
+logging:
+  level:
+    org.hibernate.SQL: ${SQL_LOG_LEVEL}
+    com.examples.spring.example: ${THIS_APP_LOG_LEVEL}
+    root: ${ROOT_LOG_LEVEL}
